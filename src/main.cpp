@@ -3,7 +3,9 @@
 
 #include "alarm.h"
 #include "globals.h"
-#include "formatter.h"
+#include "menu.h"
+
+DateTime prevTime;
 
 void readInputs();
 
@@ -27,20 +29,12 @@ void setup()
 
 void loop()
 {
-  DateTime dateTime = rtc.now();
-  if (alarmState == ALARM_OFF)
+  prevTime = dateTime;
+  dateTime = rtc.now();
+  if (currentView == TIME_VIEW && dateTime > prevTime)
   {
-    lcd.setCursor(0, 0);
-    String fechaString = formatDate(dateTime);
-    lcd.print(fechaString);
-    lcd.setCursor(0, 1);
-    String horaString = formatTime(dateTime);
-    lcd.print(horaString);
+    showTime();
     delay(250);
-  }
-  if (dateTime.second() == 30 && alarmState != ALARM_RINGING)
-  {
-    startAlarm();
   }
   readInputs();
   updateAlarm();
@@ -48,4 +42,20 @@ void loop()
 
 void readInputs()
 {
+  switch (currentView)
+  {
+  case TIME_VIEW:
+    if (digitalRead(PIN_PAD_1) == LOW)
+    {
+      showMenu();
+    }
+    break;
+
+  case MENU_VIEW:
+    if (digitalRead(PIN_PAD_7) == LOW)
+    {
+      showTime();
+    }
+    break;
+  }
 }

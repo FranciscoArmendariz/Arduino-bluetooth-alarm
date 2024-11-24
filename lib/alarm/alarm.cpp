@@ -1,29 +1,54 @@
 
 #include "alarm.h"
 #include "globals.h"
+#include "menu.h"
 
 RTC_DS3231 rtc;
+DateTime dateTime = DateTime();
+DateTime alarmTime = DateTime("2024/11/24", "16:49:0");
+
 int alarmState = ALARM_OFF;
 
-const long toneInterval = 75;   // 75ms for tone on/off
-const long pauseInterval = 925; // 925ms pause between cycles
+const long toneInterval = 75;
+const long pauseInterval = 925;
 long previousMillis = 0;
-int toneCycle = 0; // Keeps track of tone cycles
+int toneStep = 0;
+
+int previousView = TIME_VIEW;
+
+bool alarmTriggered = false;
+
+bool isAlarmTime()
+{
+    if (alarmTriggered)
+    {
+        if (dateTime >= (alarmTime + TimeSpan(60)))
+        {
+            alarmTriggered = false;
+        };
+        return false;
+    }
+    if (dateTime.hour() == alarmTime.hour() && dateTime.minute() == alarmTime.minute())
+    {
+        alarmTriggered = true;
+        return true;
+    }
+    return false;
+}
 
 void startAlarm()
 {
-    alarmState = ALARM_RINGING;
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("  !!!ALARMA!!!  ");
-    toneCycle = 0;
+    alarmState = ALARM_ON;
+    previousView = currentView;
+    showAlarm();
+    toneStep = 0;
     previousMillis = millis(); // Initialize timer
 }
 
 void stopAlarm()
 {
     alarmState = ALARM_OFF;
-    lcd.clear();
+    showViewById(previousView);
     noTone(PIN_BUZZER);
 }
 
@@ -31,6 +56,10 @@ void updateAlarm()
 {
     if (alarmState == ALARM_OFF)
     {
+        if (isAlarmTime() && alarmState != ALARM_ON)
+        {
+            startAlarm();
+        }
         return;
     }
 
@@ -42,16 +71,16 @@ void updateAlarm()
         return;
     }
 
-    if (alarmState == ALARM_RINGING)
+    if (alarmState == ALARM_ON)
     {
         if (currentMillis - previousMillis >= toneInterval)
         {
             previousMillis = currentMillis;
 
             // Alternate between tone and silence
-            if (toneCycle < 8)
+            if (toneStep < 8)
             {
-                if (toneCycle % 2 == 0)
+                if (toneStep % 2 == 0)
                 {
                     tone(PIN_BUZZER, 3000);
                 }
@@ -59,17 +88,14 @@ void updateAlarm()
                 {
                     noTone(PIN_BUZZER);
                 }
-                toneCycle++;
-            }
-            else if (toneCycle == 8)
-            {
-                noTone(PIN_BUZZER);
-                toneCycle++;
-                previousMillis += pauseInterval - toneInterval; // Skip the pause duration
+                toneStep++;
             }
             else
             {
-                toneCycle = 0; // Reset cycle
+                noTone(PIN_BUZZER);
+                toneStep++;
+                previousMillis += pauseInterval - toneInterval;
+                toneStep = 0;
             }
         }
     }
