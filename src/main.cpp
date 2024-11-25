@@ -3,19 +3,42 @@
 
 #include "alarm.h"
 #include "globals.h"
-#include "menu.h"
+#include "clockView.h"
+#include "menuView.h"
+#include "alarmView.h"
+#include "alarmConfigView.h"
+#include "utils.h"
 
-DateTime prevTime;
+byte backChar[] = {
+    0x04,
+    0x08,
+    0x1F,
+    0x09,
+    0x05,
+    0x01,
+    0x0F,
+    0x00};
 
-void readInputs();
+byte openExclamationChar[] = {
+    0x00,
+    0x04,
+    0x00,
+    0x00,
+    0x04,
+    0x04,
+    0x04,
+    0x04};
 
 void setup()
 {
   Serial.begin(9600);
   pinMode(PIN_BUZZER, OUTPUT);
-  pinMode(PIN_BUTTON, INPUT);
+  DDRB = B00000000;
   Wire.begin();
+  Serial.begin(9600);
   lcd.init();
+  lcd.createChar(0, backChar);
+  lcd.createChar(1, openExclamationChar);
   lcd.backlight();
 
   if (!rtc.begin())
@@ -29,33 +52,24 @@ void setup()
 
 void loop()
 {
-  prevTime = dateTime;
+  prevDateTime = dateTime;
   dateTime = rtc.now();
-  if (currentView == TIME_VIEW && dateTime > prevTime)
-  {
-    showTime();
-    delay(250);
-  }
-  readInputs();
   updateAlarm();
-}
+  pressInListener();
 
-void readInputs()
-{
   switch (currentView)
   {
-  case TIME_VIEW:
-    if (digitalRead(PIN_PAD_1) == LOW)
-    {
-      showMenu();
-    }
+  case CLOCK_VIEW:
+    clockViewLoop();
     break;
-
   case MENU_VIEW:
-    if (digitalRead(PIN_PAD_7) == LOW)
-    {
-      showTime();
-    }
+    menuViewLoop();
+    break;
+  case ALARM_VIEW:
+    alarmViewLoop();
+    break;
+  case ALARM_CONFIG_VIEW:
+    alarmConfigViewLoop();
     break;
   }
 }

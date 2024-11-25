@@ -6,6 +6,8 @@
 // VARIABLES
 extern RTC_DS3231 rtc;
 extern DateTime dateTime;
+extern DateTime prevDateTime;
+
 extern DateTime alarmTime;
 
 extern int alarmState;

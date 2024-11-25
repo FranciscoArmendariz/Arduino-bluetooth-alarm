@@ -1,11 +1,11 @@
 
 #include "alarm.h"
 #include "globals.h"
-#include "menu.h"
 
 RTC_DS3231 rtc;
 DateTime dateTime = DateTime();
-DateTime alarmTime = DateTime("2024/11/24", "16:49:0");
+DateTime prevDateTime = dateTime;
+DateTime alarmTime = DateTime("2024/11/24", "18:54:0");
 
 int alarmState = ALARM_OFF;
 
@@ -14,15 +14,17 @@ const long pauseInterval = 925;
 long previousMillis = 0;
 int toneStep = 0;
 
-int previousView = TIME_VIEW;
+int previousView = CLOCK_VIEW;
 
 bool alarmTriggered = false;
+int alarmTriggeredHour = 0;
+int alarmTriggeredMinute = 0;
 
 bool isAlarmTime()
 {
     if (alarmTriggered)
     {
-        if (dateTime >= (alarmTime + TimeSpan(60)))
+        if (dateTime.hour() >= alarmTriggeredHour && dateTime.minute() >= alarmTriggeredMinute + 1)
         {
             alarmTriggered = false;
         };
@@ -31,6 +33,8 @@ bool isAlarmTime()
     if (dateTime.hour() == alarmTime.hour() && dateTime.minute() == alarmTime.minute())
     {
         alarmTriggered = true;
+        alarmTriggeredHour = alarmTime.hour();
+        alarmTriggeredMinute = alarmTime.minute();
         return true;
     }
     return false;
@@ -40,7 +44,7 @@ void startAlarm()
 {
     alarmState = ALARM_ON;
     previousView = currentView;
-    showAlarm();
+    currentView = ALARM_VIEW;
     toneStep = 0;
     previousMillis = millis(); // Initialize timer
 }
@@ -48,7 +52,7 @@ void startAlarm()
 void stopAlarm()
 {
     alarmState = ALARM_OFF;
-    showViewById(previousView);
+    currentView = previousView;
     noTone(PIN_BUZZER);
 }
 
@@ -64,12 +68,6 @@ void updateAlarm()
     }
 
     long currentMillis = millis();
-
-    if (digitalRead(PIN_BUTTON) == LOW)
-    {
-        stopAlarm();
-        return;
-    }
 
     if (alarmState == ALARM_ON)
     {
@@ -91,6 +89,7 @@ void updateAlarm()
                 toneStep++;
             }
             else
+            // when the loop end of 4 tones and 4 silences is reached the loop resets and a longer pause is made
             {
                 noTone(PIN_BUZZER);
                 toneStep++;
