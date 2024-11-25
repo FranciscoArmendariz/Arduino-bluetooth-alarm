@@ -36,4 +36,8 @@ void handleMenuInputs()
     {
         currentView = ALARM_CONFIG_VIEW;
     }
+    if (pressOut(PIN_PAD_5))
+    {
+        currentView = TIME_CONFIG_VIEW;
+    }
 }

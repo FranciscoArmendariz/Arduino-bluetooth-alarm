@@ -41,17 +41,18 @@ String formatTime(const DateTime time, bool hasSeconds)
 
     if (hasSeconds)
     {
+        formattedTime += ":";
         if (time.second() < 10)
         {
             formattedTime += "0";
         }
-        formattedTime += ":" + String(time.second());
+        formattedTime += String(time.second());
     }
 
     return formattedTime;
 }
 
-String formatTime(int hours, int minutes)
+String formatTime(int hours, int minutes, int seconds)
 {
     String formattedTime = "";
 
@@ -66,6 +67,16 @@ String formatTime(int hours, int minutes)
         formattedTime += "0";
     }
     formattedTime += String(minutes);
+
+    if (seconds >= 0)
+    {
+        formattedTime += ":";
+        if (seconds < 10)
+        {
+            formattedTime += "0";
+        }
+        formattedTime += String(seconds);
+    }
 
     return formattedTime;
 }

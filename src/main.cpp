@@ -7,6 +7,7 @@
 #include "menuView.h"
 #include "alarmView.h"
 #include "alarmConfigView.h"
+#include "timeConfigView.h"
 #include "utils.h"
 
 byte backChar[] = {
@@ -70,6 +71,9 @@ void loop()
     break;
   case ALARM_CONFIG_VIEW:
     alarmConfigViewLoop();
+    break;
+  case TIME_CONFIG_VIEW:
+    timeConfigViewLoop();
     break;
   }
 }

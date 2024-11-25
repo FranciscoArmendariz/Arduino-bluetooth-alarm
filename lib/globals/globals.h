@@ -31,5 +31,6 @@ const int CLOCK_VIEW = 0;
 const int MENU_VIEW = 1;
 const int ALARM_VIEW = 2;
 const int ALARM_CONFIG_VIEW = 3;
+const int TIME_CONFIG_VIEW = 4;
 
 #endif

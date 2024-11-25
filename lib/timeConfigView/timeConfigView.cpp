@@ -1,40 +1,40 @@
 
-#include "alarmConfigView.h"
+#include "timeConfigView.h"
 #include "globals.h"
 #include "utils.h"
 #include "alarm.h"
 
 static bool changedValue = false;
 
-static int hours = alarmTime.hour();
-static int minutes = alarmTime.minute();
+static int hours = dateTime.hour();
+static int minutes = dateTime.minute();
 
-static void setAlarmConfigDisplay();
+static void setTimeConfigDisplay();
 static void updateDisplayTime();
-static void handleAlarmConfigInputs();
+static void handleTimeConfigInputs();
 
-void alarmConfigViewLoop()
+void timeConfigViewLoop()
 {
     if (currentView != currentDisplay)
     {
         lcd.clear();
-        hours = alarmTime.hour();
-        minutes = alarmTime.minute();
-        setAlarmConfigDisplay();
+        hours = dateTime.hour();
+        minutes = dateTime.minute();
+        setTimeConfigDisplay();
         currentDisplay = currentView;
     }
-    handleAlarmConfigInputs();
+    handleTimeConfigInputs();
     updateDisplayTime();
 }
-void setAlarmConfigDisplay()
+void setTimeConfigDisplay()
 {
     lcd.setCursor(0, 0);
     lcd.print("7-");
     lcd.write(0);
     lcd.print("  5-Hrs 3-Min");
     lcd.setCursor(0, 1);
-    String horaString = formatTime(hours, minutes);
-    lcd.print("  [" + horaString + "]");
+    String horaString = formatTime(hours, minutes, 0);
+    lcd.print("[" + horaString + "]");
     lcd.setCursor(11, 1);
     lcd.print("1-OK");
 }
@@ -43,14 +43,14 @@ void updateDisplayTime()
 {
     if (changedValue)
     {
-        lcd.setCursor(3, 1);
+        lcd.setCursor(1, 1);
         changedValue = false;
-        String horaString = formatTime(hours, minutes);
+        String horaString = formatTime(hours, minutes, 0);
         lcd.print(horaString);
     }
 }
 
-void handleAlarmConfigInputs()
+void handleTimeConfigInputs()
 {
     if (pressOut(PIN_PAD_7))
     {
@@ -58,7 +58,8 @@ void handleAlarmConfigInputs()
     }
     if (pressOut(PIN_PAD_1))
     {
-        alarmTime = DateTime(dateTime.year(), dateTime.month(), dateTime.day(), hours, minutes, 0);
+        dateTime = DateTime(dateTime.year(), dateTime.month(), dateTime.day(), hours, minutes, 0);
+        rtc.adjust(dateTime);
         currentView = MENU_VIEW;
     }
     if (pressOut(PIN_PAD_5))
