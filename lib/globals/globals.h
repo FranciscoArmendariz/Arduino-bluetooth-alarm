@@ -22,6 +22,10 @@ const int PIN_PAD_7 = 10;
 
 const int INPUT_PINS[] = {PIN_BUTTON, PIN_PAD_1, PIN_PAD_3, PIN_PAD_5, PIN_PAD_7};
 
+const String DATE_COMMAND = "DATE";
+const String TIME_COMMAND = "TIME";
+const String ALARM_COMMAND = "ALRM";
+
 // set the current view and current view on the display
 extern int currentView;
 extern int currentDisplay;

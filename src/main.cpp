@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <Arduino.h>
+#include <SoftwareSerial.h>
 
 #include "alarm.h"
 #include "globals.h"
@@ -9,6 +10,7 @@
 #include "alarmConfigView.h"
 #include "timeConfigView.h"
 #include "utils.h"
+#include "bluetoothListener.h"
 
 byte backChar[] = {
     0x04,
@@ -33,10 +35,10 @@ byte openExclamationChar[] = {
 void setup()
 {
   Serial.begin(9600);
+  bluetooth.begin(9600);
   pinMode(PIN_BUZZER, OUTPUT);
   DDRB = B00000000;
   Wire.begin();
-  Serial.begin(9600);
   lcd.init();
   lcd.createChar(0, backChar);
   lcd.createChar(1, openExclamationChar);
@@ -53,9 +55,15 @@ void setup()
 
 void loop()
 {
+  if (bluetooth.available() > 0)
+  {
+    String message = bluetooth.readStringUntil(';');
+    Serial.println(message);
+  }
   prevDateTime = dateTime;
   dateTime = rtc.now();
   updateAlarm();
+  listenBluetooth();
   pressInListener();
 
   switch (currentView)
