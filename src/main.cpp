@@ -55,11 +55,6 @@ void setup()
 
 void loop()
 {
-  if (bluetooth.available() > 0)
-  {
-    String message = bluetooth.readStringUntil(';');
-    Serial.println(message);
-  }
   prevDateTime = dateTime;
   dateTime = rtc.now();
   updateAlarm();
